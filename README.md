@@ -1,2 +1,2 @@
 # hashtag-finder
-cs160 project
+CS160 project
