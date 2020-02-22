@@ -15,10 +15,10 @@ public class Instagram_HashtagFinderServiceImpl implements Instagram_HashtagFind
     @Autowired
     HashtagFinderRepo hashtagFinderRepo;
 
-//    @Override
-//    public List<HashtagFinder> findBySearch_word(String search_word) {
-//        return hashtagFinderRepo.findBySearch_word(search_word);
-//    }
+    @Override
+    public List<HashtagFinder> findBySearchWord(String searchWord) {
+        return hashtagFinderRepo.findBySearchWord(searchWord);
+    }
 
     @Override
     public List<HashtagFinder> findAll() {
@@ -31,7 +31,7 @@ public class Instagram_HashtagFinderServiceImpl implements Instagram_HashtagFind
         hashtags.add(new Hashtag("food", 2020));
         hashtags.add(new Hashtag("foo", 2020323));
         HashtagFinder hashtagFinder1 = new HashtagFinder();
-        hashtagFinder1.setSearch_word("foo");
+        hashtagFinder1.setSearchWord("foo");
         hashtagFinder1.setHashtags(hashtags);
         hashtagFinderRepo.insert(hashtagFinder1);
     }

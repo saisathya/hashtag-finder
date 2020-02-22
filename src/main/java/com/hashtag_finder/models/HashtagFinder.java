@@ -9,7 +9,7 @@ import java.util.List;
 public class HashtagFinder {
 
     private @Id String id;
-    private String search_word;
+    private String searchWord;
     private List<Hashtag> hashtags;
 
     public String getId() {
@@ -20,12 +20,12 @@ public class HashtagFinder {
         this.id = id;
     }
 
-    public String getSearch_word() {
-        return search_word;
+    public String getSearchWord() {
+        return searchWord;
     }
 
-    public void setSearch_word(String search_word) {
-        this.search_word = search_word;
+    public void setSearchWord(String searchWord) {
+        this.searchWord = searchWord;
     }
 
     public List<Hashtag> getHashtags() {

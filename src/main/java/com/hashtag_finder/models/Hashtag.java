@@ -3,7 +3,12 @@ package com.hashtag_finder.models;
 import jdk.nashorn.internal.objects.annotations.Getter;
 import jdk.nashorn.internal.objects.annotations.Setter;
 
+/*
+Note: We need to make sure each class in our model class has getter and setter
+in order to make object serilizable and store in database
 
+This class contains hashtag name and its properties such as post numbers.
+ */
 public class Hashtag {
 
     String hashtagName;
