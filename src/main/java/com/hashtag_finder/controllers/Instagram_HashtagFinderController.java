@@ -1,31 +1,27 @@
 package com.hashtag_finder.controllers;
 
+import com.hashtag_finder.models.GetHashtagInput;
 import com.hashtag_finder.models.HashtagFinder;
-import com.hashtag_finder.services.Instagram_HashtagFinderService;
+import com.hashtag_finder.services.HashtagFinderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("hashtagFinder/instagram")
 public class Instagram_HashtagFinderController {
 
     @Autowired
-    Instagram_HashtagFinderService instagram_hashtagFinderService;
+    HashtagFinderService instagram_hashtagFinderService;
 
-    @GetMapping("/findall")
-    public ResponseEntity<?> getAll() {
-        List<HashtagFinder> result = instagram_hashtagFinderService.findAll();
+    @PostMapping(path = "/getHashtags", consumes="application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<?> getHashtags(@RequestBody GetHashtagInput input) {
+        List<HashtagFinder> result = instagram_hashtagFinderService.findHashtagsBySearchWord(input);
         return new ResponseEntity(result, HttpStatus.OK);
-    }
-
-    @GetMapping("/add")
-    public String add() {
-        instagram_hashtagFinderService.insert();
-        return "Added new entity";
     }
 
 }

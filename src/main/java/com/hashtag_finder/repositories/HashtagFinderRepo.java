@@ -9,6 +9,4 @@ import java.util.List;
 @Repository
 public interface HashtagFinderRepo extends MongoRepository<HashtagFinder, String> {
     List<HashtagFinder> findBySearchWord(String searchWord);
-
-//    void delete(String id);
 }

@@ -1,48 +1,39 @@
 package com.hashtag_finder.services;
 
-import com.hashtag_finder.models.Hashtag;
+import com.hashtag_finder.models.GetHashtagInput;
 import com.hashtag_finder.models.HashtagFinder;
 import com.hashtag_finder.repositories.HashtagFinderRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class Instagram_HashtagFinderServiceImpl implements Instagram_HashtagFinderService {
+public class Instagram_HashtagFinderServiceImpl implements HashtagFinderService {
 
     @Autowired
     HashtagFinderRepo hashtagFinderRepo;
 
     @Override
-    public List<HashtagFinder> findBySearchWord(String searchWord) {
-        return hashtagFinderRepo.findBySearchWord(searchWord);
+    public List<HashtagFinder> findHashtagsBySearchWord(GetHashtagInput input) {
+        String searchWord = input.getSearchWord();
+        List<HashtagFinder> result = hashtagFinderRepo.findBySearchWord(searchWord);
+        if(result == null || result.size() == 0) {
+            // Run Scrapper
+        }else
+        {
+            return hashtagFinderRepo.findBySearchWord(searchWord);
+        }
+        return null;
     }
 
-    @Override
     public List<HashtagFinder> findAll() {
         return hashtagFinderRepo.findAll();
     }
 
     @Override
-    public void insert() {
-        List<Hashtag> hashtags = new ArrayList<>();
-        hashtags.add(new Hashtag("food", 2020));
-        hashtags.add(new Hashtag("foo", 2020323));
-        HashtagFinder hashtagFinder1 = new HashtagFinder();
-        hashtagFinder1.setSearchWord("foo");
-        hashtagFinder1.setHashtags(hashtags);
-        hashtagFinderRepo.insert(hashtagFinder1);
+    public void insertIntoDB(HashtagFinder hashtagFinder) {
+        hashtagFinderRepo.insert(hashtagFinder);
     }
 
-//    @Override
-//    public void saveOrUpdateHashtagFinder(HashtagFinder hashtagFinder) {
-//        hashtagFinderRepo.save(hashtagFinder);
-//    }
-//
-//    @Override
-//    public void deleteHashtagFinder(String id) {
-//        hashtagFinderRepo.delete(id);
-//    }
 }

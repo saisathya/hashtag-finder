@@ -7,7 +7,7 @@ import jdk.nashorn.internal.objects.annotations.Setter;
 Note: We need to make sure each class in our model class has getter and setter
 in order to make object serilizable and store in database
 
-This class contains hashtag name and its properties such as post numbers.
+This class contains hashtag name and its properties.
  */
 public class Hashtag {
 
