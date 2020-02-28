@@ -15,7 +15,7 @@ import java.util.List;
 public class Instagram_HashtagFinderController {
 
     @Autowired
-    HashtagFinderService instagram_hashtagFinderService;
+    HashtagFinderService instagram_hashtagFinderService ;
 
     @PostMapping(path = "/getHashtags", consumes="application/json", produces = "application/json")
     @ResponseBody

@@ -58,7 +58,7 @@ public class Instagram_HashtagFinderServiceImpl implements HashtagFinderService 
         //open browser with desired URL
         driver.get("https://www.instagram.com/explore/tags/instagram");
         WebElement input = driver.findElement(By.xpath("/html/body/div[1]/section/nav/div[2]/div/div/div[2]/input"));
-        input.sendKeys(hashtag);
+        input.sendKeys("#"+hashtag);
         Thread.sleep(2000);
         //Get the values of the result
         List<WebElement> results = driver.findElements(By.xpath("//*[@id=\"react-root\"]/section/nav/div[2]/div/div/div[2]/div[2]/div[2]/div/a"));
@@ -73,10 +73,8 @@ public class Instagram_HashtagFinderServiceImpl implements HashtagFinderService 
                 hashtags.add(pair);
             }
         }
+        driver.close();
         return getTopTenHashtags(hashtags);
-        //closing the browser
-        //driver.close();
-
     }
 
     public List<Hashtag> getTopTenHashtags(List<Hashtag> hashtags)
