@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class Instagram_HashtagFinderServiceImpl implements HashtagFinderService {
+public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
 
     @Autowired
     HashtagFinderRepo hashtagFinderRepo;
