@@ -41,7 +41,7 @@ public class InstagramHashtagFinderControllerTest {
     private InstagramHashtagFinderController instagram_hashtagFinderController;
 
     private MockMvc mockMvc;
-    static GetHashtagInput anObject;
+
 
 
     @Before

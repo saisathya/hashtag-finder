@@ -22,6 +22,12 @@ public class Hashtag implements Comparable<Hashtag> {
         this.hashtagPostNumber = hashtagPostNumber;
     }
 
+    public Hashtag()
+    {
+        this.hashtagPostNumber = null;
+        this.hashtagName = null;
+    }
+
     public String getHashtagPostNumber() {
         return hashtagPostNumber;
     }
