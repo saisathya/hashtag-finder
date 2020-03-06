@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -55,7 +56,7 @@ public class InstagramHashtagFinderControllerTest {
 
         //Create Json input to attach with post request
         GetHashtagInput anObject = new GetHashtagInput();
-        anObject.setSearchWord("test");
+        anObject.setSearchWord(new ArrayList<String>(Arrays.asList("Test")));
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
         ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
@@ -65,16 +66,15 @@ public class InstagramHashtagFinderControllerTest {
         hashtagFindersTest.add(new HashtagFinder());
         hashtagFindersTest.add(new HashtagFinder());
 
-        when(hashtagFinderService.findHashtagsBySearchWord(any(GetHashtagInput.class))).thenReturn(hashtagFindersTest);
+        when(hashtagFinderService.findHashtagsBySearchWords(any(GetHashtagInput.class))).thenReturn(hashtagFindersTest);
 
         mockMvc.perform(post("/hashtagFinder/instagram/getHashtags").contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$", hasSize(2)));
 
-        verify(hashtagFinderService, times(1)).findHashtagsBySearchWord(any(GetHashtagInput.class));
+        verify(hashtagFinderService, times(1)).findHashtagsBySearchWords(any(GetHashtagInput.class));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class InstagramHashtagFinderControllerTest {
         mockMvc.perform(post("/hashtagFinder/instagram/getHashtags").contentType(MediaType.APPLICATION_JSON)
                 .content(badRequestBody))
                 .andExpect(status().isBadRequest());
-        verify(hashtagFinderService, never()).findHashtagsBySearchWord(any());
+        verify(hashtagFinderService, never()).findHashtagsBySearchWords(any());
     }
 
 }

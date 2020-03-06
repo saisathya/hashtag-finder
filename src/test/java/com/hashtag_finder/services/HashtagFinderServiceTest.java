@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.junit.Assert;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HashtagFinderServiceTest {
@@ -46,11 +47,11 @@ public class HashtagFinderServiceTest {
         hashtagFindersTest.add(new HashtagFinder());
 
         GetHashtagInput anObject = new GetHashtagInput();
-        anObject.setSearchWord("test");
+        anObject.setSearchWord(new ArrayList<String>(Arrays.asList("Test1", "Test2")));
 
         when(hashtagFinderRepo.findBySearchWord(anyString())).thenReturn(hashtagFindersTest);
 
-        List<HashtagFinder> result = hashtagFinderService.findHashtagsBySearchWord(anObject);
+        List<HashtagFinder> result = hashtagFinderService.findHashtagsBySearchWords(anObject);
 
         Assert.assertEquals(2, result.size());
 
@@ -61,7 +62,7 @@ public class HashtagFinderServiceTest {
     public void findHashtagsBySearchWordRunningCrawlerTest() throws InterruptedException {
         List<HashtagFinder> hashtagFindersTest = new ArrayList<>();
         GetHashtagInput anObject = new GetHashtagInput();
-        anObject.setSearchWord("test");
+        anObject.setSearchWord(new ArrayList<String>(Arrays.asList("Test")));
 
         List<Hashtag> resultFromCallingRunScrawler = new ArrayList<>();
         resultFromCallingRunScrawler.add(new Hashtag());
@@ -70,10 +71,10 @@ public class HashtagFinderServiceTest {
         when(hashtagFinderRepo.findBySearchWord(anyString())).thenReturn(hashtagFindersTest);
         when(instagramHashtagCrawler.runGetHashtagsCrawler(anyString())).thenReturn(resultFromCallingRunScrawler);
 
-        List<HashtagFinder> result = hashtagFinderService.findHashtagsBySearchWord(anObject);
+        List<HashtagFinder> result = hashtagFinderService.findHashtagsBySearchWords(anObject);
 
         Assert.assertEquals(1, result.size());
-        verify(instagramHashtagCrawler, times(1)).runGetHashtagsCrawler(anObject.getSearchWord());
+        verify(instagramHashtagCrawler, times(1)).runGetHashtagsCrawler(anyString());
 
     }
 

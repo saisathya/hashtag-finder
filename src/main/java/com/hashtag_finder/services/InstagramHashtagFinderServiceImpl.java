@@ -7,6 +7,7 @@ import com.hashtag_finder.repositories.HashtagFinderRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -20,8 +21,20 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
     InstagramHashtagCrawler instagramHashtagCrawler;
 
     @Override
-    public List<HashtagFinder> findHashtagsBySearchWord(GetHashtagInput input) {
-        String searchWord = input.getSearchWord();
+    public List<HashtagFinder> findHashtagsBySearchWords(GetHashtagInput input) {
+        List<String> searchWords = input.getSearchWords();
+        List<HashtagFinder> hashtagFinders = new ArrayList<>();
+
+        for(String searcWord: searchWords)
+        {
+            if(searcWord.length() >= 1) hashtagFinders.add(findHashtagsBySearchWord(searcWord));
+        }
+
+        return hashtagFinders;
+    }
+
+    public HashtagFinder findHashtagsBySearchWord(String searchWord)
+    {
         List<HashtagFinder> results = hashtagFinderRepo.findBySearchWord(searchWord);
 
         if(results == null || results.size() == 0) {
@@ -36,8 +49,10 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
             {
             }
         }
-        return results;
+
+        return results.get(0);
     }
+
 
     public List<HashtagFinder> findAll() {
         return hashtagFinderRepo.findAll();

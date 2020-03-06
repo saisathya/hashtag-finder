@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface HashtagFinderService {
 
-    List<HashtagFinder> findHashtagsBySearchWord(GetHashtagInput input);
+    List<HashtagFinder> findHashtagsBySearchWords(GetHashtagInput input);
 
     void insertIntoDB(HashtagFinder hashtagFinder);
 

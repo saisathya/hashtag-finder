@@ -21,7 +21,7 @@ public class InstagramHashtagFinderController {
     @PostMapping(path = "/getHashtags", consumes="application/json", produces = "application/json")
     @ResponseBody
     public ResponseEntity<?> getHashtags(@Valid @RequestBody GetHashtagInput input) {
-        List<HashtagFinder> result = instagram_hashtagFinderService.findHashtagsBySearchWord(input);
+        List<HashtagFinder> result = instagram_hashtagFinderService.findHashtagsBySearchWords(input);
         return new ResponseEntity(result, HttpStatus.OK);
     }
 }
