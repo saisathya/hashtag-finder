@@ -30,10 +30,7 @@ public class Hashtag implements Comparable<Hashtag> {
 
     public int filterOutCommaInStringAndConvertToInt(String number)
     {
-        System.out.println("Before"+number);
-        String s = number.replaceAll(",","");
-        System.out.println("After"+s);
-        return Integer.parseInt(s);
+        return Integer.parseInt(number.replaceAll(",",""));
     }
 
 
