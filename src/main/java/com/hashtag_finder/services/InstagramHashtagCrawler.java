@@ -42,13 +42,13 @@ public class InstagramHashtagCrawler {
             }
         }
         driver.close();
-        return getTopTenHashtags(hashtags);
+        return getSortedHashtags(hashtags);
     }
 
-    public List<Hashtag> getTopTenHashtags(List<Hashtag> hashtags)
+    public List<Hashtag> getSortedHashtags(List<Hashtag> hashtags)
     {
         Collections.sort(hashtags);
-        return hashtags.subList(0, 10);
+        return hashtags;
     }
 
 }

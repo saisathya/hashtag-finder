@@ -14,21 +14,30 @@ This class contains hashtag name and its properties.
 public class Hashtag implements Comparable<Hashtag> {
 
     String hashtagName;
-    String hashtagPostNumber; //contains Hashtag post number
+    int hashtagPostNumber; //contains Hashtag post number
 
     public Hashtag(String hashtagName, String hashtagPostNumber)
     {
         this.hashtagName = hashtagName;
-        this.hashtagPostNumber = hashtagPostNumber;
+        this.hashtagPostNumber = filterOutCommaInStringAndConvertToInt(hashtagPostNumber);
     }
 
     public Hashtag()
     {
-        this.hashtagPostNumber = null;
+        this.hashtagPostNumber = -1;
         this.hashtagName = null;
     }
 
-    public String getHashtagPostNumber() {
+    public int filterOutCommaInStringAndConvertToInt(String number)
+    {
+        System.out.println("Before"+number);
+        String s = number.replaceAll(",","");
+        System.out.println("After"+s);
+        return Integer.parseInt(s);
+    }
+
+
+    public int getHashtagPostNumber() {
         return hashtagPostNumber;
     }
 
@@ -41,7 +50,7 @@ public class Hashtag implements Comparable<Hashtag> {
     }
 
     public void setHashtagPostNumber(String hashtagPostNumber) {
-        this.hashtagPostNumber = hashtagPostNumber;
+        this.hashtagPostNumber = filterOutCommaInStringAndConvertToInt(hashtagPostNumber);
     }
 
     public String toString()
@@ -51,6 +60,6 @@ public class Hashtag implements Comparable<Hashtag> {
 
     @Override
     public int compareTo(Hashtag o) {
-        return this.hashtagPostNumber.compareTo(o.hashtagPostNumber);
+        return o.hashtagPostNumber - this.hashtagPostNumber;
     }
 }
