@@ -26,14 +26,9 @@ public class InstagramHashtagCrawler {
         //Set up
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("start-maximized"); // https://stackoverflow.com/a/26283818/1689770
-        options.addArguments("enable-automation"); // https://stackoverflow.com/a/43840128/1689770
-        options.addArguments("--no-sandbox"); //https://stackoverflow.com/a/50725918/1689770
-        options.addArguments("--disable-infobars"); //https://stackoverflow.com/a/43840128/1689770
-        options.addArguments("--disable-dev-shm-usage"); //https://stackoverflow.com/a/50725918/1689770
-        options.addArguments("--disable-browser-side-navigation"); //https://stackoverflow.com/a/49123152/1689770
-        options.addArguments("--disable-gpu");
-        options.addArguments("headless");
+        options.addArguments("--disable-gpu"); //https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
+        options.addArguments("--disable-features=VizDisplayCompositor");
+        //options.addArguments("headless");
         WebDriver driver=new ChromeDriver(options);
         TimeUnit.SECONDS.sleep(1);
         driver.get("https://www.instagram.com/explore/tags/instagram");
@@ -68,7 +63,7 @@ public class InstagramHashtagCrawler {
         Queue<String> queue = new LinkedList<String>();
         queue.add(start);
         String hashtag;
-        while(queue.size() != 0 || hashtags.size() == 5)
+        while(queue.size() != 0 || hashtags.size() == 1)
         {
             hashtag = queue.poll();
             //TODO: Need to change the driver and click
@@ -106,6 +101,7 @@ public class InstagramHashtagCrawler {
         //need to judge if new hashtag is in range of averageLikes
         double upperLimit = average + (average * percentangeThreshold);
         double lowerLimit = average - (average * percentangeThreshold);
+        System.out.println("Average: " + average + "  -  UpperLimit: " + upperLimit + "  -  LowerLimit:" + lowerLimit);
         if(averageLikes <= upperLimit && averageLikes >= lowerLimit)
         {
             hashtags.add(new Hashtag(hashtag, ""+ driver.findElement(By.xpath(""))));
@@ -121,7 +117,6 @@ public class InstagramHashtagCrawler {
         {
             neighborTagLinks.add(tag.findElement(By.xpath("a")).getAttribute("href"));
         }
-
         return neighborTagLinks;
     }
 
@@ -135,26 +130,26 @@ public class InstagramHashtagCrawler {
         topNine.addAll(driver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/article/div[1]/div/div/div[3]/div")));
         //open browser with desired URL
         int sum = 0;
+        int count = 0;
         for(WebElement picture: topNine)
         {
             int likes = getLikes(picture);
-            sum += likes;
-            System.out.println("complete with " + likes);
+            if(likes != -1)
+            {
+                sum += likes;
+                count++;
+            }
         }
-        return sum/9;
+        return sum/count;
     }
 
     public int getLikes(WebElement picture)
     {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
-        options.addArguments("start-maximized"); // https://stackoverflow.com/a/26283818/1689770
-        options.addArguments("enable-automation"); // https://stackoverflow.com/a/43840128/1689770
-        options.addArguments("--no-sandbox"); //https://stackoverflow.com/a/50725918/1689770
-        options.addArguments("--disable-infobars"); //https://stackoverflow.com/a/43840128/1689770
-        options.addArguments("--disable-dev-shm-usage"); //https://stackoverflow.com/a/50725918/1689770
-        options.addArguments("--disable-browser-side-navigation"); //https://stackoverflow.com/a/49123152/1689770
-        options.addArguments("--disable-gpu");
+        //options.addArguments("headless");
+        options.addArguments("--disable-gpu"); //https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
+        options.addArguments("--disable-features=VizDisplayCompositor");
+
         WebDriver postDriver=new ChromeDriver(options);
         try {
             TimeUnit.SECONDS.sleep(1);
@@ -163,9 +158,44 @@ public class InstagramHashtagCrawler {
         }
         postDriver.get(picture.findElement(By.xpath("a")).getAttribute("href"));
         WebDriverWait wait = new WebDriverWait(postDriver, 10);
-        //TODO: This can change handle that change
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span")));
-        WebElement likesElement = postDriver.findElement(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span"));
+        WebElement likesElement = null;
+        int counter = 0;
+        if(postDriver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span")).isEmpty()) {
+            if(postDriver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/span/span")).isEmpty())
+            {
+                return -1;
+            }
+            else
+            {
+                likesElement = postDriver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span")).get(0);
+            }
+        }
+        else
+        {
+            likesElement = postDriver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span")).get(0);
+        }
+//        while(likesElement == null)
+//        {
+//            try{
+//                Thread.sleep(100);
+//                likesElement = postDriver.findElement(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span"));
+//            }
+//            catch(Exception e)
+//            {
+//                e.printStackTrace();
+//            }
+//            if(counter > 2000)
+//            {
+//                if(postDriver.findElements(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/span/span")).isEmpty())
+//                {
+//                    return -1;
+//                }
+//                likesElement = postDriver.findElement(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/span/span"));
+//            }
+//            counter++;
+//        }
+//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span")));
+//        likesElement = postDriver.findElement(By.xpath("//*[@id=\"react-root\"]/section/main/div/div/article/div[2]/section[2]/div/div/button/span"));
         int retInteger = Integer.parseInt(likesElement.getText().replaceAll(",", ""));
         postDriver.close();
         return retInteger;

@@ -36,7 +36,6 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
     public HashtagFinder findHashtagsBySearchWord(String searchWord)
     {
         List<HashtagFinder> results = hashtagFinderRepo.findBySearchWord(searchWord);
-
         if(results == null || results.size() == 0) {
             try {
                 List<Hashtag> hashtags = instagramHashtagCrawler.runGetHashtagsCrawler(searchWord);
@@ -49,8 +48,8 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
             {
             }
         }
-
-        return results.get(0);
+        return new HashtagFinder();
+        //return results.get(0);
     }
 
 

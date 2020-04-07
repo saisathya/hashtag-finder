@@ -1,8 +1,5 @@
 package com.hashtag_finder.models;
 
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.Setter;
-
 import java.util.Comparator;
 
 /*
