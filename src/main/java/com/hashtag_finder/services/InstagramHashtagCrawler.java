@@ -21,7 +21,8 @@ import java.util.regex.Pattern;
 @Service
 public class InstagramHashtagCrawler {
 
-    final double percentangeThreshold = 0.10;
+    final double percentangeThreshold = 0.50;
+    final int hashtagSizeList = 1;
     public List<Hashtag> runGetHashtagsCrawler(String hashtag) throws InterruptedException {
         //Set up
         WebDriverManager.chromedriver().setup();
@@ -40,37 +41,44 @@ public class InstagramHashtagCrawler {
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"react-root\"]/section/nav/div[2]/div/div/div[2]/div[2]/div[2]/div/a")));
         List<WebElement> inputResultLinks = driver.findElements(By.xpath("//*[@id=\"react-root\"]/section/nav/div[2]/div/div/div[2]/div[2]/div[2]/div/a"));
 
-        List<Hashtag> hashtags = new ArrayList<>();
+        List<Hashtag> hashtags;
         HashSet<String> viewedTags = new HashSet<>();
-        updateHashTags(inputResultLinks, driver, hashtags, viewedTags, 300);
+        hashtags = updateHashTags(inputResultLinks, driver, viewedTags, 2000);
+        System.out.println("FINISHED");
         driver.close();
         return getSortedHashtags(hashtags);
     }
 
-    private void updateHashTags(List<WebElement> inputResults, WebDriver driver, List<Hashtag> hashtags, HashSet<String> viewedTags, int averageLikes) {
+    private List<Hashtag> updateHashTags(List<WebElement> inputResults, WebDriver driver, HashSet<String> viewedTags, int averageLikes) {
+        List<Hashtag> result;
         for(WebElement webElement: inputResults)
         {
             if(webElement.findElement(By.xpath("div/div/div[1]/span")).getText().charAt(0) == '#') {
                 webElement.click();
                 //entry point
-                bfs(driver, webElement.findElement(By.xpath("div/div/div[1]/span")).getText(), hashtags, viewedTags, averageLikes);
-                break;
+                result = bfs(driver, webElement.findElement(By.xpath("div/div/div[1]/span")).getText(), viewedTags, averageLikes);
+                return result.isEmpty() ? null : result;
             }
         }
+        return null;
     }
 
-    private void bfs(WebDriver driver, String start, List<Hashtag> hashtags, HashSet<String> viewedTags, int averageLikes) {
+    private List<Hashtag> bfs(WebDriver driver, String start, HashSet<String> viewedTags, int averageLikes) {
+        List<Hashtag> hashtags = new ArrayList<>();
         Queue<String> queue = new LinkedList<String>();
         queue.add(start);
         String hashtag;
-        while(queue.size() != 0 || hashtags.size() == 1)
+        while(queue.size() != 0 || hashtags.size() == hashtagSizeList /* This is shortened to search faster */)
         {
             hashtag = queue.poll();
-            //TODO: Need to change the driver and click
             System.out.print(hashtag + ": ");
             driver.get(getLinkFromHashTag(hashtag));
             //should this hashtag be used?
-            addHashTag(hashtags, averageLikes, hashtag, driver);
+            Hashtag newHashtag = getHashTag(averageLikes, hashtag, driver);
+            if(newHashtag != null) hashtags.add(newHashtag);
+            if(hashtags.size() == hashtagSizeList) {
+                break;
+            }
             viewedTags.add(hashtag);
             //get a list of related hashtags that are not in
             Iterator<String> i = getNeighbors(driver).iterator();
@@ -85,7 +93,7 @@ public class InstagramHashtagCrawler {
                 System.out.println("");
             }
         }
-
+        return hashtags;
     }
 
     private String getHashTagFromLink(String link) {
@@ -96,16 +104,18 @@ public class InstagramHashtagCrawler {
         return "https://www.instagram.com/explore/tags/" + hashtag.substring(1) + "/";
     }
 
-    private void addHashTag(List<Hashtag> hashtags, int averageLikes, String hashtag, WebDriver driver) {
+    private Hashtag getHashTag(int averageLikes, String hashtag, WebDriver driver) {
         double average = getTopNineAverage(driver, hashtag);
         //need to judge if new hashtag is in range of averageLikes
         double upperLimit = average + (average * percentangeThreshold);
         double lowerLimit = average - (average * percentangeThreshold);
-        System.out.println("Average: " + average + "  -  UpperLimit: " + upperLimit + "  -  LowerLimit:" + lowerLimit);
+        System.out.println("Average: " + averageLikes + "  -  UpperLimit: " + upperLimit + "  -  LowerLimit:" + lowerLimit);
         if(averageLikes <= upperLimit && averageLikes >= lowerLimit)
         {
-            hashtags.add(new Hashtag(hashtag, ""+ driver.findElement(By.xpath(""))));
+            System.out.println("ADDING: " + hashtag);
+            return new Hashtag(hashtag, ""+ driver.findElement(By.xpath("/html/body/div[1]/section/main/header/div[2]/div[1]/div[2]/span/span")).getText());
         }
+        return null;
     }
 
     private List<String> getNeighbors(WebDriver page) {
@@ -159,7 +169,6 @@ public class InstagramHashtagCrawler {
     public List<Hashtag> getSortedHashtags(List<Hashtag> hashtags)
     {
         Collections.sort(hashtags);
-        hashtags.add(new Hashtag("0", "0"));
         return hashtags;
     }
 

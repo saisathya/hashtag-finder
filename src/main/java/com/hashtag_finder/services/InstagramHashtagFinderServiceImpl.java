@@ -48,8 +48,7 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
             {
             }
         }
-        return new HashtagFinder();
-        //return results.get(0);
+        return results.get(0);
     }
 
 
