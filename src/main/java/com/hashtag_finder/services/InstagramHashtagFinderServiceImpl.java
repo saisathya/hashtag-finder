@@ -25,9 +25,9 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
         List<String> searchWords = input.getSearchWords();
         List<HashtagFinder> hashtagFinders = new ArrayList<>();
 
-        for(String searcWord: searchWords)
+        for(String searchWord: searchWords)
         {
-            if(searcWord.length() >= 1) hashtagFinders.add(findHashtagsBySearchWord(searcWord));
+            if(searchWord.length() >= 1) hashtagFinders.add(findHashtagsBySearchWord(searchWord));
         }
 
         return hashtagFinders;
@@ -46,6 +46,7 @@ public class InstagramHashtagFinderServiceImpl implements HashtagFinderService {
                 this.insertIntoDB(hf);
             }catch (Exception ex)
             {
+                System.out.println("not enough results");
             }
         }
         return results.get(0);
