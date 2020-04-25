@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, TextArea, Button } from "grommet";
-import { Clipboard, FormRefresh } from "grommet-icons";
+import { Clipboard, FormRefresh, ClearOption } from "grommet-icons";
 import PropTypes from "prop-types";
 import ResultTable from "../ui/ResultTable";
 
@@ -19,7 +19,7 @@ const RelevantHashtags = ({
   return (
     <>
       <Box pad="xsmall" direction="column" flex="grow" align="center">
-        {userSuggested.length > 0 && (
+        {recommendedTags.length > 0 && (
           <Box pad="xsmall" height="small" width="large" direction="row">
             <TextArea
               id="suggestedHashtags"
@@ -36,6 +36,13 @@ const RelevantHashtags = ({
                 icon={<Clipboard />}
                 onClick={copy}
                 label="copy"
+              />
+              <Button
+                margin="xsmall"
+                plain={false}
+                icon={<ClearOption/>}
+                onClick={() => resetSuggestedTags([])}
+                label="clear"
               />
               <Button
                 margin="xsmall"
