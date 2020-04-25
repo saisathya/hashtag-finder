@@ -33,21 +33,21 @@ const RelevantHashtags = ({
               <Button
                 margin="xsmall"
                 plain={false}
-                icon={<Clipboard />}
+                icon={<Clipboard color="brand"/>}
                 onClick={copy}
                 label="copy"
               />
               <Button
                 margin="xsmall"
                 plain={false}
-                icon={<ClearOption/>}
+                icon={<ClearOption color="brand"/>}
                 onClick={() => resetSuggestedTags([])}
                 label="clear"
               />
               <Button
                 margin="xsmall"
                 plain={false}
-                icon={<FormRefresh />}
+                icon={<FormRefresh color="brand"/>}
                 onClick={() => resetSuggestedTags(recommendedTags)}
                 label="reset"
               />
