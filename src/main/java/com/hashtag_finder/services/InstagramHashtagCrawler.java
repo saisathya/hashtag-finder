@@ -19,15 +19,16 @@ import java.util.concurrent.*;
 @Service
 public class InstagramHashtagCrawler {
 
-    private static final long SEARCH_TIME = 100000;
+    private static final long SEARCH_TIME = 25000;
     private static final long DELAY = 100;
     final double percentangeThreshold = 0.50;
     final int hashtagSizeList = 1;
     final int bfsThreadNumber = 5;
     private volatile GracefulExecutor executor;
     private final static ConcurrentMap<String, Boolean> seen = new ConcurrentHashMap<>();
-    private final static ConcurrentMap<String, Integer> hashtagResults = new ConcurrentHashMap<>();
-    private static final int AVERAGE_LIKES = 3000;
+    private final static ConcurrentMap<String, String> hashtagResults = new ConcurrentHashMap<>();
+    private static final int AVERAGE_LIKES = 2000;
+    private static final int MAX_RETURNED = 20;
 
     public List<Hashtag> runGetHashtagsCrawler(String hashtag) throws InterruptedException {
         //Set up
@@ -35,7 +36,7 @@ public class InstagramHashtagCrawler {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-gpu"); //https://stackoverflow.com/questions/51959986/how-to-solve-selenium-chromedriver-timed-out-receiving-message-from-renderer-exc
         options.addArguments("--disable-features=VizDisplayCompositor");
-        options.addArguments("headless");
+        //options.addArguments("headless");
         WebDriver driver=new ChromeDriver(options);
         TimeUnit.SECONDS.sleep(1);
         driver.get("https://www.instagram.com/explore/tags/instagram");
@@ -48,29 +49,72 @@ public class InstagramHashtagCrawler {
         List<WebElement> inputResultLinks = driver.findElements(By.xpath("//*[@id=\"react-root\"]/section/nav/div[2]/div/div/div[2]/div[2]/div[2]/div/a"));
 
         List<Hashtag> hashtags;
-        hashtags = updateHashTags(inputResultLinks);
+        hashtags = updateHashTags(inputResultLinks, hashtag);
         driver.quit();
         return getSortedHashtags(hashtags);
     }
 
-    private List<Hashtag> updateHashTags(List<WebElement> inputResults) {
-        List<Hashtag> result;
+    private List<Hashtag> updateHashTags(List<WebElement> inputResults, String hashtag) {
+        List<Hashtag> result = new ArrayList<Hashtag>();
+        List<Hashtag> padding = new ArrayList<>();
         for(WebElement webElement: inputResults)
         {
+            System.out.println(webElement.getTagName());
             if(webElement.findElement(By.xpath("div/div/div[1]/span")).getText().charAt(0) == '#') {
                 webElement.click();
-                //entry point
-                result = bfs(webElement.findElement(By.xpath("div/div/div[1]/span")).getText());
-                return result.isEmpty() ? null : result;
+                String hashTagStr = webElement.findElement(By.xpath("div/div/div[1]/span")).getText();
+                result = bfs(hashTagStr);
+                break;
             }
         }
-        return null;
+        int i = 0;
+        for(Hashtag paddingHashTag : getPadding(hashtag))
+        {
+            if(i == 10)
+            {
+                break;
+            }
+            result.add(paddingHashTag);
+            i++;
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    private List<Hashtag> getPadding(String hashtag)
+    {
+        WebDriverManager.chromedriver().setup();
+        WebDriver driver=new ChromeDriver();
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        //maximize window
+        driver.manage().window().maximize();
+        //open browser with desired URL
+        driver.get("https://www.instagram.com/explore/tags/instagram");
+        WebElement input = driver.findElement(By.xpath("/html/body/div[1]/section/nav/div[2]/div/div/div[2]/input"));
+        input.sendKeys("#"+hashtag);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //Get the values of the result
+        List<WebElement> results = driver.findElements(By.xpath("//*[@id=\"react-root\"]/section/nav/div[2]/div/div/div[2]/div[2]/div[2]/div/a"));
+        List<Hashtag> hashtags = new ArrayList<>();
+        for(WebElement element : results)
+        {
+            if(element.getAttribute("href").contains("https://www.instagram.com/explore/tags/"))
+            {
+                String showAutocomplete = element.findElement(By.xpath("div/div/div[1]/span")).getAttribute("innerHTML");
+                String getTagFollowers = element.findElement(By.xpath("div/div/div[2]/span/span")).getAttribute("innerHTML");
+                Hashtag pair = new Hashtag(showAutocomplete, getTagFollowers);
+                hashtags.add(pair);
+            }
+        }
+        driver.quit();
+        return hashtags;
     }
 
     private List<Hashtag> bfs(String start) {
         List<Hashtag> hashtags = new ArrayList<>();
-        Object host = new Object();
-        HashSet<String> viewedTags = new HashSet<>();
         //start
         bfsStart(start);
         //run time
@@ -79,9 +123,15 @@ public class InstagramHashtagCrawler {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Done searching");
-        //stop
+        System.out.println("Done Searching with: " + hashtagResults.size() + " hits");
         bfsStop();
+        Iterator<Map.Entry<String, String>> itr = hashtagResults.entrySet().iterator();
+        while (itr.hasNext()) {
+            Map.Entry<String, String> entry = itr.next();
+            String key = entry.getKey();
+            String value = entry.getValue();
+            hashtags.add(new Hashtag(key, value));
+        }
         return hashtags;
     }
 
@@ -174,7 +224,6 @@ public class InstagramHashtagCrawler {
                 futureLikes.add(future);
             }
 
-            int logCount = 0;
             for(Future<Integer> fut : futureLikes)
             {
                 try {
@@ -188,8 +237,6 @@ public class InstagramHashtagCrawler {
                 {
                     e.printStackTrace();
                 }
-                System.out.println("Finished " + hashtag + ": " + logCount);
-                logCount++;
             }
             return count != 0 ? sum/count : 0;
         }
@@ -199,13 +246,12 @@ public class InstagramHashtagCrawler {
             //need to judge if new hashtag is in range of averageLikes
             double upperLimit = average + (average * percentangeThreshold);
             double lowerLimit = average - (average * percentangeThreshold);
-            System.out.println("Average: " + AVERAGE_LIKES + "  -  UpperLimit: " + upperLimit + "  -  LowerLimit:" + lowerLimit);
+            System.out.println("Your Average: " + AVERAGE_LIKES + "  - HashTagAverage: " + "  -  UpperLimit: " + upperLimit + "  -  LowerLimit:" + lowerLimit);
             if(AVERAGE_LIKES <= upperLimit && AVERAGE_LIKES >= lowerLimit)
             {
-                System.out.println("ADDING: " + hashtag);
                 return true;
             }
-            return false;
+            return true;
         }
 
         private List<String> getNeighbors() {
@@ -218,11 +264,6 @@ public class InstagramHashtagCrawler {
                 neighborTagLinks.add(tag.findElement(By.xpath("a")).getAttribute("href"));
             }
             return neighborTagLinks;
-        }
-
-        public int getNumberFromString(String str)
-        {
-            return Integer.parseInt(str.replaceAll(",",""));
         }
 
         @Override
@@ -239,7 +280,8 @@ public class InstagramHashtagCrawler {
             hashTagPageDriver.get(getLinkFromHashTag(hashtag));
             //should this hashtag be used? if not it will be null
             if(isInHashTagRange(hashtag)) {
-                hashtagResults.putIfAbsent(hashtag, getNumberFromString(hashTagPageDriver.findElement(By.xpath("/html/body/div[1]/section/main/header/div[2]/div[1]/div[2]/span/span")).getText()));
+                hashtagResults.putIfAbsent(hashtag, hashTagPageDriver.findElement(By.xpath("/html/body/div[1]/section/main/header/div[2]/div[1]/div[2]/span/span")).getText());
+                System.out.println("SIZE is now growing: " + hashtagResults.size());
             }
             if(inappropriate)
             {

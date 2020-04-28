@@ -56,4 +56,21 @@ public class Hashtag implements Comparable<Hashtag> {
     public int compareTo(Hashtag o) {
         return o.hashtagPostNumber - this.hashtagPostNumber;
     }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if(o instanceof Hashtag)
+        {
+            Hashtag tag = (Hashtag) o;
+            return this.hashtagName.equals(tag.hashtagName);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return hashtagName.hashCode();
+    }
 }
