@@ -9,7 +9,7 @@
     "@testing-library/user-event": "^7.2.1",
     "grommet": "^2.11.2",
     "grommet-icons": "^4.4.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "polished": "^3.4.4",
     "prop-types": "^15.7.2",
     "react": "^16.13.0",
